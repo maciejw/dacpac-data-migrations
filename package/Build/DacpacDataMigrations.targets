@@ -34,22 +34,15 @@ END
 --
     </_OutputScript>
     <_PreDeploymentScript>
-BEGIN TRAN
+BEGIN TRANSACTION;
+SET XACT_ABORT ON;
     </_PreDeploymentScript>
     <_PostDeploymentScript>
-BEGIN TRY
 
 :r ".\$([MSBuild]::MakeRelative($(_BaseDirectory), $(_SetupFile)))"
 :r ".\$([MSBuild]::MakeRelative($(_BaseDirectory), $(_OutputFile)))"
 
-IF @@TRANCOUNT > 0
-  COMMIT TRAN
-END TRY
-BEGIN CATCH
-  IF @@TRANCOUNT > 0
-    ROLLBACK TRAN
-  THROW
-END CATCH
+COMMIT TRANSACTION;
     </_PostDeploymentScript>
     
     <_PreDeploymentScriptFile>$(_BaseDirectory)\Script.PreDeployment.sql</_PreDeploymentScriptFile>
@@ -78,6 +71,7 @@ END CATCH
       <_MigrationScript>
 IF NOT EXISTS(SELECT 1 FROM $(_MigrationsTable) WHERE Name = '$(_MigrationName)')
 BEGIN
+  PRINT N'Applying migration ''$(_MigrationName)'''
   :r $(_MigrationPath)
   INSERT INTO $(_MigrationsTable) VALUES ('$(_MigrationName)')
 END

@@ -1,5 +1,5 @@
 # README #
-Data migrations is not an easy task, few condition should be met if you want be able to do it without any problems. you can read it in migration scenarios.
+Data migrations is not an easy task, few condition should be met if you want be able to do it without any problems. you can read it in [Migration Scenarios](../../wiki/Migration-Scenarios).
 
 Most of the time database deployment is done using database comparing tools and few script developers wrote. This could be error prone, stressful and hard to automate. With this package you can perform database updates in predictable manner. You can test it. Store and version your database package as an artifact on your CI.
 
