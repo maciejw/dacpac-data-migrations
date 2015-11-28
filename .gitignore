@@ -1,0 +1,15 @@
+*.suo
+*.user
+*.dbmdl
+
+[Dd]ebug/
+[Rr]elease/
+x64/
+[Bb]in/
+[Oo]bj/
+
+packages/
+out/
+
+tests/TestProject/TestProject/DacpacDataMigrationsInclude.targets
+tests/TestProject/TestProject/packages.config

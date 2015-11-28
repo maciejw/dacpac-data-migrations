@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+
+  <PropertyGroup>
+    <DacpacDataMigrationsSchema Condition="'$(DacpacDataMigrationsSchema)'==''">__Migrations</DacpacDataMigrationsSchema>
+    <DacpacDataMigrationsTableName Condition="'$(DacpacDataMigrationsTableName)'==''">Log</DacpacDataMigrationsTableName>
+  </PropertyGroup>
+
+  <PropertyGroup>  
+    <_MigrationsSchema>$(DacpacDataMigrationsSchema)</_MigrationsSchema>      
+    <_MigrationsTable>$(_MigrationsSchema).$(DacpacDataMigrationsTableName)</_MigrationsTable>    
+    <_MigrationNameLength>256</_MigrationNameLength>    
+    <_BaseDirectory>$(MSBuildProjectDirectory)\obj\$(Configuration)</_BaseDirectory>
+    <_MigrationsRootFolder>$(MSBuildProjectDirectory)\DataMigrations</_MigrationsRootFolder>
+
+    <_SetupFile>$(_BaseDirectory)\DacpacDataMigrationsSetup.sql</_SetupFile>
+    <_OutputFile>$(_BaseDirectory)\DacpacDataMigrations.sql</_OutputFile>
+
+    <_SetupScript>
+IF (SELECT SCHEMA_ID('$(_MigrationsSchema)')) IS NULL
+BEGIN
+  EXEC ('CREATE SCHEMA $(_MigrationsSchema)')
+END
+
+IF (SELECT OBJECT_ID('$(_MigrationsTable)')) IS NULL
+BEGIN
+  CREATE TABLE $(_MigrationsTable)
+  (
+    Name NVARCHAR($(_MigrationNameLength)) PRIMARY KEY NOT NULL
+  )
+END
+    </_SetupScript>
+    <_OutputScript>
+--
+    </_OutputScript>
+    <_PreDeploymentScript>
+BEGIN TRAN
+    </_PreDeploymentScript>
+    <_PostDeploymentScript>
+BEGIN TRY
+
+:r ".\$([MSBuild]::MakeRelative($(_BaseDirectory), $(_SetupFile)))"
+:r ".\$([MSBuild]::MakeRelative($(_BaseDirectory), $(_OutputFile)))"
+
+IF @@TRANCOUNT > 0
+  COMMIT TRAN
+END TRY
+BEGIN CATCH
+  IF @@TRANCOUNT > 0
+    ROLLBACK TRAN
+  THROW
+END CATCH
+    </_PostDeploymentScript>
+    
+    <_PreDeploymentScriptFile>$(_BaseDirectory)\Script.PreDeployment.sql</_PreDeploymentScriptFile>
+    <_PostDeploymentScriptFile>$(_BaseDirectory)\Script.PostDeployment.sql</_PostDeploymentScriptFile>
+
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DacpacDataMigrationsDependsOn>
+      SetupProject;
+      CreateDacpacMigration;
+    </DacpacDataMigrationsDependsOn>
+  </PropertyGroup>
+
+  <Target Name="DacpacDataMigrations" BeforeTargets="BeforeBuild" DependsOnTargets="$(DacpacDataMigrationsDependsOn)" />
+
+  <Target Name="CreateDacpacMigration" Inputs="@(Migration)" Outputs="%(Identity).Dummy">
+    <PropertyGroup>
+      <_MigrationName>%(Migration.RecursiveDir)%(Migration.FileName)</_MigrationName>
+      <_MigrationPath>".\$([MSBuild]::MakeRelative($(_BaseDirectory), %(Migration.FullPath)))"</_MigrationPath>
+    </PropertyGroup>
+
+    <Message Text="Adding migration '$(_MigrationName)' to file $(_OutputFile)" />
+
+    <PropertyGroup>
+      <_MigrationScript>
+IF NOT EXISTS(SELECT 1 FROM $(_MigrationsTable) WHERE Name = '$(_MigrationName)')
+BEGIN
+  :r $(_MigrationPath)
+  INSERT INTO $(_MigrationsTable) VALUES ('$(_MigrationName)')
+END
+      </_MigrationScript>
+    </PropertyGroup>
+
+    <WriteLinesToFile File="$(_OutputFile)" Overwrite="false" Lines="$(_MigrationScript)" />
+  </Target>
+
+  <Target Name="SetupProject">
+    <MakeDir Directories="$(_MigrationsRootFolder)" Condition="!Exists('$(_MigrationsRootFolder)')" />
+
+    <ItemGroup>
+      <Migration Include="$(_MigrationsRootFolder)\**\*.sql" />
+    </ItemGroup>
+
+    <Message Text="Writing migration setup file $(_SetupFile)" />
+    <WriteLinesToFile File="$(_SetupFile)" Overwrite="true" Lines="$(_SetupScript)" />
+
+    <Message Text="Writing beginning of migration output file $(_OutputFile)" />
+    <WriteLinesToFile File="$(_OutputFile)" Overwrite="true" Lines="$(_OutputScript)" />
+
+    <WriteLinesToFile File="$(_PreDeploymentScriptFile)" Overwrite="true" Condition="!Exists('$(_PreDeploymentScriptFile)')" Lines="$(_PreDeploymentScript)" />
+    <WriteLinesToFile File="$(_PostDeploymentScriptFile)" Overwrite="true" Condition="!Exists('$(_PostDeploymentScriptFile)')" Lines="$(_PostDeploymentScript)" />
+  </Target>
+
+</Project>
