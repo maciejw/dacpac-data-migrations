@@ -12,7 +12,7 @@ body {
 
 .container {
   width: 90%;
-  max-width: 600px;
+  max-width: 660px;
   margin: 0 auto;
 }
 
@@ -46,7 +46,7 @@ header {
 header h1 {
   font-size: 30px;
   line-height: 1.5;
-  margin: 0 0 0 -40px;
+  margin:0;
   font-weight: bold;
   font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
   color: #b5e853;
@@ -58,8 +58,14 @@ header h1 {
 }
 
 header h1:before {
-  content: "./ ";
+  content: "$ ./";
   font-size: 24px;
+  margin-left: -30px;
+}
+#main_content h2:before {
+  content: "$ ./";
+  font-size: 24px;
+  margin-left: -30px;
 }
 
 header h2 {
@@ -220,6 +226,10 @@ hr {
 .btn-github .icon {
   opacity: 0.6;
   background: url("../images/blacktocat.png") 0 0 no-repeat;
+}
+.btn-nuget .icon {
+  opacity: 0.6;
+  background: url("https://www.nuget.org/Content/Images/packageDefaultIcon.png") 0px 0px/16px 16px no-repeat;
 }
 
 /* Links

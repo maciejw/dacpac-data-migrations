@@ -8,19 +8,19 @@
     <link rel="stylesheet" type="text/css" href="stylesheets/github-dark.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
 
-    <title>Dacpac-data-migrations by maciejw</title>
+    <title>dacpac-data-migrations by maciejw</title>
   </head>
 
   <body>
 
     <header>
       <div class="container">
-        <h1>Dacpac-data-migrations</h1>
+        <h1>dacpac-data-migrations</h1>
         <h2>Deploy your database without data lose with dacpac</h2>
-
         <section id="downloads">
           <a href="https://github.com/maciejw/dacpac-data-migrations/zipball/master" class="btn">Download as .zip</a>
           <a href="https://github.com/maciejw/dacpac-data-migrations/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://www.nuget.org/packages/DacpacDataMigrations/" class="btn btn-nuget"><span class="icon"></span>Nuget package</a>
           <a href="https://github.com/maciejw/dacpac-data-migrations" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
         </section>
       </div>
@@ -28,31 +28,34 @@
 
     <div class="container">
       <section id="main_content">
-        <p>If you wander is it possible to deploy your MS Sql Server database automatically without data loss...</p>
+<h2>quest</h2>
+      
+<p>If you ever wander is it possible to deploy your MsSql Server database automatically without data loss...</p>
 
-<p>The answer is <strong>YES</strong> and this project will help you with it.</p>
+<p>The answer is <strong>YES</strong></p>
+
+<h2>salvation</h2>
+ 
+<p>... and this project will help you with it.</p>
 
 <p>Data migrations is not an easy task, few condition should be met if you want be able to do it without any problems. you can read it in <a href="https://github.com/maciejw/dacpac-data-migrations/wiki/Migration-Scenarios">Migration Scenarios</a>.</p>
 
-<p>Most of the time database deployment is done using database comparing tools and few script developers wrote. This could be error prone, stressful and hard to automate. With this package you can perform database updates in predictable manner. You can test it. Store and version your database package as an artifact on your CI.</p>
+<p>Most of the time database deployment is done using database comparing tools and few script developers wrote. Using it could be error prone, stressful and hard to automate. With this package you can perform database updates in predictable manner. You can test it. Store and version your database package as an artifact on your CI.</p>
 
-<h2>
-<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation:</h2>
+<h2>installation</h2>
 
-<p>Visual Studio does not supports nuget packages in SSDT projects. Since you cant add nuget to this kind of project to visual studio, you should do what visual studio is doing by hand. </p>
+<p>Visual Studio does not supports nuget packages in SSDT projects. Since you cant add nuget to this kind of project to Visual Studio, you should do what Visual Studio is doing by hand. </p>
 
 <p>First you should create <a href="https://github.com/maciejw/dacpac-data-migrations/blob/master/project-template-files/packages.config">packages.config</a> in our database project folder to inform nuget to restore package.
 After you restored package you can copy to database project folder file <a href="https://github.com/maciejw/dacpac-data-migrations/blob/master/project-template-files/DacpacDataMigrationsInclude.targets">DacpacDataMigrationsInclude.targets</a> and include it in sqlproj file, to do that add <code>&lt;Import Condition="Exists('DacpacDataMigrationsInclude.targets')" Project="DacpacDataMigrationsInclude.targets" /&gt;</code></p>
 
 <p>When everything is set up, you can build your project. Migration will be added to your dacpac automatically.</p>
 
-<h2>
-<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage:</h2>
+<h2>usage</h2>
 
 <p>In your database project folder after build it, you should notice folder named <code>DataMigrations</code>, you can add sql files to it, they should be marked with build action <code>None</code> if you want to add them to visual studio project. They are added to deployment script in alphabetical order, files can be nested in sub directories. you can force order by prefixing them with numbers 001, 002 ... etc.</p>
 
-<h2>
-<a id="running" class="anchor" href="#running" aria-hidden="true"><span class="octicon octicon-link"></span></a>Running:</h2>
+<h2>running</h2>
 
 <p>When you publish your database for the first time, table <code>__Migration.Log</code> will be created. Length of migration name is 256 characters. In this table migrations will be added when deployment is performed successfully. Schema and table name can be changed setting msbuild props <code>DacpacDataMigrationsSchema</code> and <code>DacpacDataMigrationsTableName</code> before including targets file.</p>
 
