@@ -4,10 +4,4 @@
     <_TagretsPath>$(SolutionDir)packages\DacpacDataMigrations.1.0.0.1\Build\DacpacDataMigrations.targets</_TagretsPath>
   </PropertyGroup>  
   <Import Project="$(_TagretsPath)" Condition="Exists('$(_TagretsPath)')" />
-  <ItemGroup>
-    <None Include="$(_SetupFile)" />
-    <None Include="$(_OutFile)" />
-    <PreDeploy Include="$(_PreDeploymentScriptFile)" />
-    <PostDeploy Include="$(_PostDeploymentScriptFile)" />
-  </ItemGroup>
 </Project>

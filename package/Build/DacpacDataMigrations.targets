@@ -49,6 +49,11 @@ COMMIT TRANSACTION;
     <_PostDeploymentScriptFile>$(_BaseDirectory)\Script.PostDeployment.sql</_PostDeploymentScriptFile>
 
   </PropertyGroup>
+  
+  <ItemGroup>
+    <PreDeploy Include="$(_PreDeploymentScriptFile)" />
+    <PostDeploy Include="$(_PostDeploymentScriptFile)" />
+  </ItemGroup>
 
   <PropertyGroup>
     <DacpacDataMigrationsDependsOn>
