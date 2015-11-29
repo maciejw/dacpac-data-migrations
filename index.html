@@ -32,7 +32,7 @@
 
 <p>The answer is <strong>YES</strong> and this project will help you with it.</p>
 
-<p>Data migrations is not an easy task, few condition should be met if you want be able to do it without any problems. you can read it in <a href="../../wiki/Migration-Scenarios">Migration Scenarios</a>.</p>
+<p>Data migrations is not an easy task, few condition should be met if you want be able to do it without any problems. you can read it in <a href="https://github.com/maciejw/dacpac-data-migrations/wiki/Migration-Scenarios">Migration Scenarios</a>.</p>
 
 <p>Most of the time database deployment is done using database comparing tools and few script developers wrote. This could be error prone, stressful and hard to automate. With this package you can perform database updates in predictable manner. You can test it. Store and version your database package as an artifact on your CI.</p>
 
@@ -41,8 +41,8 @@
 
 <p>Visual Studio does not supports nuget packages in SSDT projects. Since you cant add nuget to this kind of project to visual studio, you should do what visual studio is doing by hand. </p>
 
-<p>First you should create <a href="project-template-files/packages.config">packages.config</a> in our database project folder to inform nuget to restore package.
-After you restored package you can copy to database project folder file <a href="project-template-files/DacpacDataMigrationsInclude.targets">DacpacDataMigrationsInclude.targets</a> and include it in sqlproj file, to do that add <code>&lt;Import Condition="Exists('DacpacDataMigrationsInclude.targets')" Project="DacpacDataMigrationsInclude.targets" /&gt;</code></p>
+<p>First you should create <a href="https://github.com/maciejw/dacpac-data-migrations/blob/master/project-template-files/packages.config">packages.config</a> in our database project folder to inform nuget to restore package.
+After you restored package you can copy to database project folder file <a href="https://github.com/maciejw/dacpac-data-migrations/blob/master/project-template-files/DacpacDataMigrationsInclude.targets">DacpacDataMigrationsInclude.targets</a> and include it in sqlproj file, to do that add <code>&lt;Import Condition="Exists('DacpacDataMigrationsInclude.targets')" Project="DacpacDataMigrationsInclude.targets" /&gt;</code></p>
 
 <p>When everything is set up, you can build your project. Migration will be added to your dacpac automatically.</p>
 
