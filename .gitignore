@@ -13,3 +13,4 @@ out/
 
 tests/TestProject/TestProject/DacpacDataMigrationsInclude.targets
 tests/TestProject/TestProject/packages.config
+.nuget/

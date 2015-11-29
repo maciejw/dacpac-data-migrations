@@ -38,13 +38,13 @@ BEGIN TRANSACTION;
 SET XACT_ABORT ON;
     </_PreDeploymentScript>
     <_PostDeploymentScript>
-
 :r ".\$([MSBuild]::MakeRelative($(_BaseDirectory), $(_SetupFile)))"
 :r ".\$([MSBuild]::MakeRelative($(_BaseDirectory), $(_OutputFile)))"
-
-COMMIT TRANSACTION;
     </_PostDeploymentScript>
-    
+    <_CommitScript>
+COMMIT TRANSACTION;
+    </_CommitScript>
+
     <_PreDeploymentScriptFile>$(_BaseDirectory)\Script.PreDeployment.sql</_PreDeploymentScriptFile>
     <_PostDeploymentScriptFile>$(_BaseDirectory)\Script.PostDeployment.sql</_PostDeploymentScriptFile>
 
@@ -58,49 +58,97 @@ COMMIT TRANSACTION;
   <PropertyGroup>
     <DacpacDataMigrationsDependsOn>
       SetupProject;
-      CreateDacpacMigration;
+      AddPreDeployScripts;
+      AddMigrationScripts;
+      AddPostDeployScripts;
+      AddCommitScript;
     </DacpacDataMigrationsDependsOn>
   </PropertyGroup>
 
   <Target Name="DacpacDataMigrations" BeforeTargets="BeforeBuild" DependsOnTargets="$(DacpacDataMigrationsDependsOn)" />
 
-  <Target Name="CreateDacpacMigration" Inputs="@(Migration)" Outputs="%(Identity).Dummy">
+  <Target Name="AddMigrationScripts" Inputs="@(_Migration)" Outputs="%(Identity).Dummy">
     <PropertyGroup>
-      <_MigrationName>%(Migration.RecursiveDir)%(Migration.FileName)</_MigrationName>
-      <_MigrationPath>".\$([MSBuild]::MakeRelative($(_BaseDirectory), %(Migration.FullPath)))"</_MigrationPath>
+      <_Name>%(_Migration.RecursiveDir)%(_Migration.FileName)</_Name>
+      <_Path>".\$([MSBuild]::MakeRelative($(_BaseDirectory), %(_Migration.FullPath)))"</_Path>
     </PropertyGroup>
 
-    <Message Text="Adding migration '$(_MigrationName)' to file $(_OutputFile)" />
+    <Message Text="Adding post deploy '$(_Name)' to file $(_OutputFile)" />
 
     <PropertyGroup>
-      <_MigrationScript>
-IF NOT EXISTS(SELECT 1 FROM $(_MigrationsTable) WHERE Name = '$(_MigrationName)')
+      <_Script>
+IF NOT EXISTS(SELECT 1 FROM $(_MigrationsTable) WHERE Name = '$(_Name)')
 BEGIN
-  PRINT N'Applying migration ''$(_MigrationName)'''
-  :r $(_MigrationPath)
-  INSERT INTO $(_MigrationsTable) VALUES ('$(_MigrationName)')
+  PRINT N'Applying migration ''$(_Name)'''
+  :r $(_Path)
+  INSERT INTO $(_MigrationsTable) VALUES ('$(_Name)')
 END
-      </_MigrationScript>
+      </_Script>
     </PropertyGroup>
 
-    <WriteLinesToFile File="$(_OutputFile)" Overwrite="false" Lines="$(_MigrationScript)" />
-  </Target>
+    <WriteLinesToFile File="$(_OutputFile)" Overwrite="false" Lines="$(_Script)" />
+  </Target>  
+  
+  
+  <Target Name="AddPreDeployScripts" Inputs="@(_PreDeploy)" Outputs="%(Identity).Dummy">
+    <PropertyGroup>
+      <_Name>%(_PreDeploy.RecursiveDir)%(_PreDeploy.FileName)</_Name>
+      <_Path>".\$([MSBuild]::MakeRelative($(_BaseDirectory), %(_PreDeploy.FullPath)))"</_Path>
+    </PropertyGroup>
+
+    <Message Text="Adding post deploy '$(_Name)' to file $(_PreDeploymentScriptFile)" />
+
+    <PropertyGroup>
+      <_Script>
+:r $(_Path)
+      </_Script>
+    </PropertyGroup>
+
+    <WriteLinesToFile File="$(_PreDeploymentScriptFile)" Overwrite="false" Lines="$(_Script)" />
+  </Target>  
+  
+  <Target Name="AddPostDeployScripts" Inputs="@(_PostDeploy)" Outputs="%(Identity).Dummy">
+    <PropertyGroup>
+      <_Name>%(_PostDeploy.RecursiveDir)%(_PostDeploy.FileName)</_Name>
+      <_Path>".\$([MSBuild]::MakeRelative($(_BaseDirectory), %(_PostDeploy.FullPath)))"</_Path>
+    </PropertyGroup>
+
+    <Message Text="Adding post deploy '$(_Name)' to file $(_PostDeploymentScriptFile)" />
+
+    <PropertyGroup>
+      <_Script>
+:r $(_Path)
+      </_Script>
+    </PropertyGroup>
+
+    <WriteLinesToFile File="$(_PostDeploymentScriptFile)" Overwrite="false" Lines="$(_Script)" />    
+  </Target>  
 
   <Target Name="SetupProject">
     <MakeDir Directories="$(_MigrationsRootFolder)" Condition="!Exists('$(_MigrationsRootFolder)')" />
 
     <ItemGroup>
-      <Migration Include="$(_MigrationsRootFolder)\**\*.sql" />
+      <_Migration Include="$(_MigrationsRootFolder)\**\*.sql" />
     </ItemGroup>
-
+    
+    <ItemGroup>
+      <_PreDeploy Include="$(MSBuildProjectDirectory)\PreDeploy.sql" Condition="Exists('$(MSBuildProjectDirectory)\PreDeploy.sql')" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <_PostDeploy Include="$(MSBuildProjectDirectory)\PostDeploy.sql" Condition="Exists('$(MSBuildProjectDirectory)\PostDeploy.sql')"/>
+    </ItemGroup>
+    
     <Message Text="Writing migration setup file $(_SetupFile)" />
     <WriteLinesToFile File="$(_SetupFile)" Overwrite="true" Lines="$(_SetupScript)" />
 
     <Message Text="Writing beginning of migration output file $(_OutputFile)" />
     <WriteLinesToFile File="$(_OutputFile)" Overwrite="true" Lines="$(_OutputScript)" />
 
-    <WriteLinesToFile File="$(_PreDeploymentScriptFile)" Overwrite="true" Condition="!Exists('$(_PreDeploymentScriptFile)')" Lines="$(_PreDeploymentScript)" />
-    <WriteLinesToFile File="$(_PostDeploymentScriptFile)" Overwrite="true" Condition="!Exists('$(_PostDeploymentScriptFile)')" Lines="$(_PostDeploymentScript)" />
+    <WriteLinesToFile File="$(_PreDeploymentScriptFile)" Overwrite="true" Lines="$(_PreDeploymentScript)" />
+    <WriteLinesToFile File="$(_PostDeploymentScriptFile)" Overwrite="true" Lines="$(_PostDeploymentScript)" />
   </Target>
-
+  <Target Name="AddCommitScript">
+      <WriteLinesToFile File="$(_PostDeploymentScriptFile)" Overwrite="false" Lines="$(_CommitScript)" />
+  </Target>
 </Project>

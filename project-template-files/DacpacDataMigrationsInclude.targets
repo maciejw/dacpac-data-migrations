@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
-    <_TagretsPath>$(SolutionDir)packages\DacpacDataMigrations.1.0.0.1\Build\DacpacDataMigrations.targets</_TagretsPath>
+    <_TagretsPath>$(SolutionDir)packages\DacpacDataMigrations.1.1.0.0\Build\DacpacDataMigrations.targets</_TagretsPath>
   </PropertyGroup>  
   <Import Project="$(_TagretsPath)" Condition="Exists('$(_TagretsPath)')" />
 </Project>

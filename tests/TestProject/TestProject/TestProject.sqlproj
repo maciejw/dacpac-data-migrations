@@ -65,8 +65,10 @@
   <ItemGroup>
     <None Include="DataMigrations\001 Seed Table1.sql" />
     <None Include="TestProject.publish.xml" />
+    <None Include="PreDeploy.sql" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Schema\Table1.sql" />
+    <None Include="PostDeploy.sql" />
   </ItemGroup>
 </Project>

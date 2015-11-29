@@ -5,9 +5,9 @@
     <id>DacpacDataMigrations</id>
     <title>Dacpac Data Migrations</title>
     <authors>warszawski.PRO</authors>
-    <description>Deploy your database without data lose with dacpac</description>
+    <description>Deploy your database without data lose with dacpac. This package cannot be installed using Visual Studio. Review project website first.</description>
     <developmentDependency>true</developmentDependency>
-    <projectUrl>https://github.com/maciejw/dacpac-data-migrations</projectUrl>
+    <projectUrl>https://maciejw.github.io/dacpac-data-migrations</projectUrl>
     <copyright>2015 warszawski.PRO</copyright>
     <tags>dacpac deploy data migration</tags>
   </metadata>

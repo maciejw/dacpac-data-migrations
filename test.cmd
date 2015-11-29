@@ -1,17 +1,17 @@
 cls
 
-call build.cmd
+call "%~0\..\build.cmd"
 
 set msbuild="C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
 set sqlpackage="C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\SQLDB\DAC\120\sqlpackage.exe"
 
 pushd tests\TestProject
 
-rd /s/q packages
+rd packages /s/q 
 
-xcopy /y ..\..\project-template-files\* TestProject
+xcopy /y "..\..\project-template-files\*" TestProject
 
-nuget restore -noCache
+call "..\..\nuget.cmd" restore -noCache
 
 %msbuild% TestProject.sln
 
