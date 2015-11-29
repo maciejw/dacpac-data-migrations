@@ -30,7 +30,7 @@
       <section id="main_content">
 <h2>quest</h2>
       
-<p>If you ever wander is it possible to deploy your MsSql Server database automatically without data loss...</p>
+<p>If you ever wander is it possible to deploy your MSSQL Server database automatically without data loss...</p>
 
 <p>The answer is <strong>YES</strong></p>
 
@@ -42,9 +42,13 @@
 
 <p>Most of the time database deployment is done using database comparing tools and few script developers wrote. Using it could be error prone, stressful and hard to automate. With this package you can perform database updates in predictable manner. You can test it. Store and version your database package as an artifact on your CI.</p>
 
+<h2>prerequisites</h2>
+
+<p>To achieve your goal you need <a href="https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx">Visual Studio</a> and <a href="https://msdn.microsoft.com/en-us/library/hh272686(v=vs.103).aspx">SQL Server Data Tools</a></p>
+
 <h2>installation</h2>
 
-<p>Visual Studio does not supports nuget packages in SSDT projects. Since you cant add nuget to this kind of project to Visual Studio, you should do what Visual Studio is doing by hand. </p>
+<p>Visual Studio does not supports nuget packages in SSDT projects. Since you can not add nuget to this kind of project to Visual Studio, you should do what Visual Studio is doing by hand. </p>
 
 <p>First you should create <a href="https://github.com/maciejw/dacpac-data-migrations/blob/master/project-template-files/packages.config">packages.config</a> in our database project folder to inform nuget to restore package.
 After you restored package you can copy to database project folder file <a href="https://github.com/maciejw/dacpac-data-migrations/blob/master/project-template-files/DacpacDataMigrationsInclude.targets">DacpacDataMigrationsInclude.targets</a> and include it in sqlproj file, to do that add <code>&lt;Import Condition="Exists('DacpacDataMigrationsInclude.targets')" Project="DacpacDataMigrationsInclude.targets" /&gt;</code></p>
@@ -59,7 +63,9 @@ After you restored package you can copy to database project folder file <a href=
 
 <p>When you publish your database for the first time, table <code>__Migration.Log</code> will be created. Length of migration name is 256 characters. In this table migrations will be added when deployment is performed successfully. Schema and table name can be changed setting msbuild props <code>DacpacDataMigrationsSchema</code> and <code>DacpacDataMigrationsTableName</code> before including targets file.</p>
 
-<p>Right now DDL and DML scripts are run in one transaction.</p>
+<p>You can not use <code>Pre</code> and <code>Post</code> build actions on your own, these actions are reserved to hook up migrations.</p>
+
+<p>Right now DDL and DML scripts are runing in one transaction.</p>
       </section>
     </div>
 
