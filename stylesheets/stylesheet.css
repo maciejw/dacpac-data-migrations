@@ -12,7 +12,7 @@ body {
 
 .container {
   width: 90%;
-  max-width: 660px;
+  max-width: 600px;
   margin: 0 auto;
 }
 
@@ -229,7 +229,7 @@ hr {
 }
 .btn-nuget .icon {
   opacity: 0.6;
-  background: url("https://www.nuget.org/Content/Images/packageDefaultIcon.png") 0px 0px/16px 16px no-repeat;
+  background: url("../images/nuget-icon.png") 0px 0px/16px 16px no-repeat;
 }
 
 /* Links
