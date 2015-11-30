@@ -1,7 +1,5 @@
 #Dacpac Data Migrations
 
-[Project home](http://maciejw.github.io/dacpac-data-migrations/)
-
 ##Installation
 
 Visual Studio does not supports nuget packages in SSDT projects. Since you cannot add nuget to this kind of project to visual studio, you should do it by hand what Visual Studio is doing. 
