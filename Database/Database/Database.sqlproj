@@ -70,6 +70,7 @@
     <Build Include="Schema\dbo.CustomerTypes.sql" />
     <Build Include="Schema\dbo.Customers.sql" />
     <None Include="DataMigrations\01 Dictionaries\0001 Initial seeding dbo.CustomerTypes.sql" />
+    <None Include="DataMigrations\03 Application Sample Data\0001 After deployment operational data.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Database.publish.xml" />
