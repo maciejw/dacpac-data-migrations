@@ -59,10 +59,21 @@
   <Import Condition="Exists('DacpacDataMigrationsInclude.targets')" Project="DacpacDataMigrationsInclude.targets" />
   <ItemGroup>
     <Folder Include="Properties" />
+    <Folder Include="DataMigrations" />
+    <Folder Include="Schema" />
+    <Folder Include="DataMigrations\01 Dictionaries" />
+    <Folder Include="DataMigrations\02 Migrations" />
+    <Folder Include="DataMigrations\03 Application Sample Data" />
     <Folder Include="Snapshots" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Schema\dbo.CustomerTypes.sql" />
+    <Build Include="Schema\dbo.Customers.sql" />
+    <None Include="DataMigrations\01 Dictionaries\0001 Initial seeding dbo.CustomerTypes.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Database.publish.xml" />
     <None Include="Snapshots\000 Empty.dacpac" />
+    <None Include="Snapshots\001 App deployment.dacpac" />
   </ItemGroup>
 </Project>
