@@ -76,5 +76,7 @@
     <None Include="Database.publish.xml" />
     <None Include="Snapshots\000 Empty.dacpac" />
     <None Include="Snapshots\001 App deployment.dacpac" />
+    <None Include="DataMigrations\02 Migrations\0001 Split customers name.sql" />
+    <None Include="Snapshots\002 App upgrade.dacpac" />
   </ItemGroup>
 </Project>
