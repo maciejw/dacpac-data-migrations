@@ -8,5 +8,6 @@
     <BlockWhenDriftDetected>False</BlockWhenDriftDetected>
     <RegisterDataTierApplication>True</RegisterDataTierApplication>
     <ProfileVersionNumber>1</ProfileVersionNumber>
+    <BlockOnPossibleDataLoss>False</BlockOnPossibleDataLoss>
   </PropertyGroup>
 </Project>

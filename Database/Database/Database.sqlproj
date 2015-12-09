@@ -78,5 +78,6 @@
     <None Include="Snapshots\001 App deployment.dacpac" />
     <None Include="DataMigrations\02 Migrations\0001 Split customers name.sql" />
     <None Include="Snapshots\002 App upgrade.dacpac" />
+    <None Include="Snapshots\003 Db upgrade.dacpac" />
   </ItemGroup>
 </Project>
