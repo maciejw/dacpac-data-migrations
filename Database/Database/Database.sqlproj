@@ -71,6 +71,9 @@
     <Build Include="Schema\dbo.Customers.sql" />
     <None Include="DataMigrations\01 Dictionaries\0001 Initial seeding dbo.CustomerTypes.sql" />
     <None Include="DataMigrations\03 Application Sample Data\0001 After deployment operational data.sql" />
+    <None Include="DataMigrations\02 Migrations\0002 Move customer types to categories.sql" />
+    <Build Include="Schema\dbo.Categories.sql" />
+    <Build Include="Schema\dbo.CustomerCategories.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Database.publish.xml" />
@@ -79,5 +82,6 @@
     <None Include="DataMigrations\02 Migrations\0001 Split customers name.sql" />
     <None Include="Snapshots\002 App upgrade.dacpac" />
     <None Include="Snapshots\003 Db upgrade.dacpac" />
+    <None Include="Snapshots\004 App upgrade.dacpac" />
   </ItemGroup>
 </Project>
