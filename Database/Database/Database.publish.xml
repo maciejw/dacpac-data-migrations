@@ -9,5 +9,6 @@
     <RegisterDataTierApplication>True</RegisterDataTierApplication>
     <ProfileVersionNumber>1</ProfileVersionNumber>
     <BlockOnPossibleDataLoss>False</BlockOnPossibleDataLoss>
+    <DropObjectsNotInSource>True</DropObjectsNotInSource>
   </PropertyGroup>
 </Project>
