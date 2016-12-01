@@ -126,6 +126,7 @@ END
 
   <Target Name="SetupProject">
     <MakeDir Directories="$(_MigrationsRootFolder)" Condition="!Exists('$(_MigrationsRootFolder)')" />
+    <MakeDir Directories="$(_BaseDirectory)" Condition="!Exists('$(_BaseDirectory)')" />
 
     <ItemGroup>
       <_Migration Include="$(_MigrationsRootFolder)\**\*.sql" />
