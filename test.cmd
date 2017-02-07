@@ -13,7 +13,7 @@ xcopy /y "..\..\project-template-files\*" TestProject
 
 call "..\..\nuget.cmd" restore -noCache
 
-%msbuild% TestProject.sln
+%msbuild% TestProject.sln %*
 
 %sqlpackage% /Action:Publish /SourceFile:"TestProject\bin\Debug\TestProject.dacpac" /TargetDatabaseName:TestProject /TargetServerName:"(localdb)\MSSQLLocalDB" /p:CreateNewDatabase=True 
 %sqlpackage% /Action:Publish /SourceFile:"TestProject\bin\Debug\TestProject.dacpac" /TargetDatabaseName:TestProject /TargetServerName:"(localdb)\MSSQLLocalDB"
