@@ -19,15 +19,13 @@
       <Out ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
     </ParameterGroup>
     <Task>
-      <Code Type="Class" Language="cs" Source="$(MSBuildThisFileDirectory)\SortItemGroup.cs">
-      </Code>
+      <Code Type="Class" Language="cs" Source="$(MSBuildThisFileDirectory)\SortItemGroup.cs" />
     </Task>
   </UsingTask>
 
-
   <PropertyGroup>
-    <DacpacDataMigrationsSchema Condition="'$(DacpacDataMigrationsSchema)'==''">__Migrations</DacpacDataMigrationsSchema>
-    <DacpacDataMigrationsTableName Condition="'$(DacpacDataMigrationsTableName)'==''">Log</DacpacDataMigrationsTableName>
+    <DacpacDataMigrationsSchema Condition="'$(DacpacDataMigrationsSchema)'==''">__</DacpacDataMigrationsSchema>
+    <DacpacDataMigrationsTableName Condition="'$(DacpacDataMigrationsTableName)'==''">Migrations</DacpacDataMigrationsTableName>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -35,41 +33,45 @@
     <_SortMigrationFilesNumericOrder Condition="'$(SortMigrationFilesNumericOrder)' == 'false'">false</_SortMigrationFilesNumericOrder>
     <_MigrationsSchema>$(DacpacDataMigrationsSchema)</_MigrationsSchema>
     <_MigrationsTable>$(_MigrationsSchema).$(DacpacDataMigrationsTableName)</_MigrationsTable>
-    <_MigrationNameLength>256</_MigrationNameLength>
+    <_MigrationNameLength>900</_MigrationNameLength>
     <_BaseDirectory>$(MSBuildProjectDirectory)\obj\$(Configuration)</_BaseDirectory>
-    <_MigrationsRootFolder>$(MSBuildProjectDirectory)\DataMigrations</_MigrationsRootFolder>
+    <_MigrationsRootFolder>$(MSBuildProjectDirectory)\Migrations</_MigrationsRootFolder>
 
     <_SetupFile>$(_BaseDirectory)\DacpacDataMigrationsSetup.sql</_SetupFile>
-    <_OutputFile>$(_BaseDirectory)\DacpacDataMigrations.sql</_OutputFile>
+    <_OutputFile>$(_BaseDirectory)\DataMigrations.sql</_OutputFile>
 
     <_SetupScript>
-      IF (SELECT SCHEMA_ID('$(_MigrationsSchema)')) IS NULL
-      BEGIN
-      EXEC ('CREATE SCHEMA $(_MigrationsSchema)')
-      END
+IF (SELECT SCHEMA_ID('$(_MigrationsSchema)')) IS NULL
+BEGIN
+  EXEC ('CREATE SCHEMA $(_MigrationsSchema)')
+END
 
-      IF (SELECT OBJECT_ID('$(_MigrationsTable)')) IS NULL
-      BEGIN
-      CREATE TABLE $(_MigrationsTable)
-      (
-      Name NVARCHAR($(_MigrationNameLength)) PRIMARY KEY NOT NULL
-      )
-      END
+IF (SELECT OBJECT_ID('$(_MigrationsTable)')) IS NULL
+BEGIN
+  CREATE TABLE $(_MigrationsTable)
+  (
+    Name NVARCHAR($(_MigrationNameLength)) PRIMARY KEY NOT NULL,
+    Datetime DATETIME2 NOT NULL DEFAULT SYSDATETIME()
+  )
+END
     </_SetupScript>
     <_OutputScript>
-      --
+-- OutputScript
     </_OutputScript>
     <_PreDeploymentScript>
-      BEGIN TRANSACTION;
-      SET XACT_ABORT ON;
+-- PreDeploymentScript
     </_PreDeploymentScript>
     <_PostDeploymentScript>
-      :r ".\$([MSBuild]::MakeRelative($(_BaseDirectory), $(_SetupFile)))"
-      :r ".\$([MSBuild]::MakeRelative($(_BaseDirectory), $(_OutputFile)))"
+:r ".\$([MSBuild]::MakeRelative($(_BaseDirectory), $(_SetupFile)))"
+:r ".\$([MSBuild]::MakeRelative($(_BaseDirectory), $(_OutputFile)))"
     </_PostDeploymentScript>
     <_CommitScript>
-      COMMIT TRANSACTION;
+COMMIT TRANSACTION;
     </_CommitScript>
+    <_OpenTransactionScript>
+SET XACT_ABORT ON;
+BEGIN TRANSACTION;
+    </_OpenTransactionScript>
 
     <_PreDeploymentScriptFile>$(_BaseDirectory)\Script.PreDeployment.sql</_PreDeploymentScriptFile>
     <_PostDeploymentScriptFile>$(_BaseDirectory)\Script.PostDeployment.sql</_PostDeploymentScriptFile>
@@ -85,17 +87,18 @@
     <DacpacDataMigrationsDependsOn>
       SetupProject;
       AddPreDeployScripts;
+      AddOpenTransactionScript;
       AddMigrationScripts;
-      AddPostDeployScripts;
       AddCommitScript;
+      AddPostDeployScripts;
     </DacpacDataMigrationsDependsOn>
   </PropertyGroup>
 
-  <Target Name="DacpacDataMigrations" BeforeTargets="BeforeBuild" DependsOnTargets="$(DacpacDataMigrationsDependsOn)" />
+  <Target Name="DataMigrations" BeforeTargets="BeforeBuild" DependsOnTargets="$(DacpacDataMigrationsDependsOn)" />
 
   <Target Name="AddMigrationScripts" Inputs="@(_Migration)" Outputs="%(Identity).Dummy">
     <PropertyGroup>
-      <_Name>%(_Migration.RecursiveDir)%(_Migration.FileName)</_Name>
+      <_Name>$([System.IO.Path]::ChangeExtension($([MSBuild]::MakeRelative( $(_MigrationsRootFolder), %(_Migration.FullPath))), null))</_Name>
       <_Path>".\$([MSBuild]::MakeRelative($(_BaseDirectory), %(_Migration.FullPath)))"</_Path>
     </PropertyGroup>
 
@@ -103,12 +106,12 @@
 
     <PropertyGroup>
       <_Script>
-        IF NOT EXISTS(SELECT 1 FROM $(_MigrationsTable) WHERE Name = '$(_Name)')
-        BEGIN
-        PRINT N'Applying migration ''$(_Name)'''
-        :r $(_Path)
-        INSERT INTO $(_MigrationsTable) VALUES ('$(_Name)')
-        END
+IF NOT EXISTS(SELECT 1 FROM $(_MigrationsTable) WHERE Name = '$(_Name)')
+BEGIN
+  PRINT N'Applying migration ''$(_Name)'''
+  :r $(_Path)
+  INSERT INTO $(_MigrationsTable) VALUES ('$(_Name)', SYSDATETIME())
+END
       </_Script>
     </PropertyGroup>
 
@@ -126,7 +129,7 @@
 
     <PropertyGroup>
       <_Script>
-        :r $(_Path)
+:r $(_Path)
       </_Script>
     </PropertyGroup>
 
@@ -143,7 +146,7 @@
 
     <PropertyGroup>
       <_Script>
-        :r $(_Path)
+:r $(_Path)
       </_Script>
     </PropertyGroup>
 
@@ -153,7 +156,6 @@
   <Target Name="SetupProject">
     <MakeDir Directories="$(_MigrationsRootFolder)" Condition="!Exists('$(_MigrationsRootFolder)')" />
     <MakeDir Directories="$(_BaseDirectory)" Condition="!Exists('$(_BaseDirectory)')" />
-
     <ItemGroup>
       <__Migration Include="$(_MigrationsRootFolder)\**\*.sql" />
       <_Migration Include="@(__Migration)" Condition="'$(_SortMigrationFilesNumericOrder)' == 'false'"/>
@@ -162,14 +164,13 @@
     <SortItemGroup In="@(__Migration)" Condition="'$(_SortMigrationFilesNumericOrder)' == 'true'">
       <Output TaskParameter="Out" ItemName="_Migration"/>
     </SortItemGroup>
-    
 
     <ItemGroup>
-      <_PreDeploy Include="$(MSBuildProjectDirectory)\PreDeploy.sql" Condition="Exists('$(MSBuildProjectDirectory)\PreDeploy.sql')" />
+      <_PreDeploy Include="$(MSBuildProjectDirectory)\PreDeploymentScript.sql" Condition="Exists('$(MSBuildProjectDirectory)\PreDeploymentScript.sql')" />
     </ItemGroup>
 
     <ItemGroup>
-      <_PostDeploy Include="$(MSBuildProjectDirectory)\PostDeploy.sql" Condition="Exists('$(MSBuildProjectDirectory)\PostDeploy.sql')"/>
+      <_PostDeploy Include="$(MSBuildProjectDirectory)\PostDeploymentScript.sql" Condition="Exists('$(MSBuildProjectDirectory)\PostDeploymentScript.sql')"/>
     </ItemGroup>
 
     <Message Text="Writing migration setup file $(_SetupFile)" />
@@ -182,6 +183,9 @@
     <WriteLinesToFile File="$(_PostDeploymentScriptFile)" Overwrite="true" Lines="$(_PostDeploymentScript)" />
   </Target>
   <Target Name="AddCommitScript">
-    <WriteLinesToFile File="$(_PostDeploymentScriptFile)" Overwrite="false" Lines="$(_CommitScript)" />
+      <WriteLinesToFile File="$(_OutputFile)" Overwrite="false" Lines="$(_CommitScript)" />
+  </Target>
+  <Target Name="AddOpenTransactionScript">
+      <WriteLinesToFile File="$(_OutputFile)" Overwrite="false" Lines="$(_OpenTransactionScript)" />
   </Target>
 </Project>
