@@ -1,80 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
-  <Choose>
-    <When Condition="'$(MSBuildToolsVersion)'=='14.0'">
-      <PropertyGroup>
-        <TasksAssemblyName>Microsoft.Build.Tasks.Core</TasksAssemblyName>
-      </PropertyGroup>
-    </When>
-    <Otherwise>
-      <PropertyGroup>
-        <TasksAssemblyName>Microsoft.Build.Tasks.v$(MSBuildToolsVersion)</TasksAssemblyName>
-      </PropertyGroup>
-    </Otherwise>
-  </Choose>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask TaskName="DacpacDataMigrations.SortItemGroup" AssemblyFile="$(MSBuildThisFileDirectory)netstandard2.0\$(MSBuildThisFileName).dll" />
 
-  <UsingTask TaskName="SortItemGroup" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\$(TasksAssemblyName).dll">
-    <ParameterGroup>
-      <In ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
-      <Out ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
-    </ParameterGroup>
-    <Task>
-      <Code Type="Class" Language="cs" Source="$(MSBuildThisFileDirectory)\SortItemGroup.cs">
-      </Code>
-    </Task>
-  </UsingTask>
-
-
-  <PropertyGroup>
-    <DacpacDataMigrationsSchema Condition="'$(DacpacDataMigrationsSchema)'==''">__Migrations</DacpacDataMigrationsSchema>
-    <DacpacDataMigrationsTableName Condition="'$(DacpacDataMigrationsTableName)'==''">Log</DacpacDataMigrationsTableName>
+  <PropertyGroup Label="Obsolete public properties">
+    <DacpacDataMigrationsTableName Condition="'$(DacpacDataMigrationsTableName)' == ''">Log</DacpacDataMigrationsTableName>
+  </PropertyGroup>
+  <PropertyGroup Label="Public properties">
+    <DacpacDataMigrationsSchema Condition="'$(DacpacDataMigrationsSchema)' == ''">__Migrations</DacpacDataMigrationsSchema>
+    <SortMigrationFilesUsingNumericOrder Condition="'$(SortMigrationFilesUsingNumericOrder)' == ''">false</SortMigrationFilesUsingNumericOrder>
   </PropertyGroup>
 
   <PropertyGroup>
-    <_SortMigrationFilesNumericOrder>true</_SortMigrationFilesNumericOrder>
-    <_SortMigrationFilesNumericOrder Condition="'$(SortMigrationFilesNumericOrder)' == 'false'">false</_SortMigrationFilesNumericOrder>
     <_MigrationsSchema>$(DacpacDataMigrationsSchema)</_MigrationsSchema>
     <_MigrationsTable>$(_MigrationsSchema).$(DacpacDataMigrationsTableName)</_MigrationsTable>
-    <_MigrationNameLength>256</_MigrationNameLength>
-    <_BaseDirectory>$(MSBuildProjectDirectory)\obj\$(Configuration)</_BaseDirectory>
-    <_MigrationsRootFolder>$(MSBuildProjectDirectory)\DataMigrations</_MigrationsRootFolder>
+    <_BaseDirectory>$(MSBuildProjectDirectory)\$(BaseIntermediateOutputPath)\$(Configuration)</_BaseDirectory>
 
-    <_SetupFile>$(_BaseDirectory)\DacpacDataMigrationsSetup.sql</_SetupFile>
-    <_OutputFile>$(_BaseDirectory)\DacpacDataMigrations.sql</_OutputFile>
-
-    <_SetupScript>
-      IF (SELECT SCHEMA_ID('$(_MigrationsSchema)')) IS NULL
-      BEGIN
-      EXEC ('CREATE SCHEMA $(_MigrationsSchema)')
-      END
-
-      IF (SELECT OBJECT_ID('$(_MigrationsTable)')) IS NULL
-      BEGIN
-      CREATE TABLE $(_MigrationsTable)
-      (
-      Name NVARCHAR($(_MigrationNameLength)) PRIMARY KEY NOT NULL
-      )
-      END
-    </_SetupScript>
-    <_OutputScript>
-      --
-    </_OutputScript>
     <_PreDeploymentScript>
-      BEGIN TRANSACTION;
-      SET XACT_ABORT ON;
+      <![CDATA[
+BEGIN TRANSACTION;
+SET XACT_ABORT ON;
+]]>
     </_PreDeploymentScript>
+    <_SetupFile>$(_BaseDirectory)\DacpacDataMigrationsSetup.sql</_SetupFile>
+    <_SetupScript>
+      <![CDATA[
+IF (SELECT SCHEMA_ID('$(_MigrationsSchema)')) IS NULL
+BEGIN
+  EXEC ('CREATE SCHEMA $(_MigrationsSchema)')
+END
+
+IF (SELECT SCHEMA_ID('__Migrations')) IS NULL
+BEGIN
+  EXEC ('CREATE SCHEMA __Migrations')
+END
+
+IF (SELECT OBJECT_ID('$(_MigrationsTable)')) IS NULL
+BEGIN
+  CREATE TABLE $(_MigrationsTable)
+  (
+    Name NVARCHAR(256) PRIMARY KEY NOT NULL
+  )
+END
+
+IF (SELECT OBJECT_ID('__Migrations.LogV2')) IS NULL
+BEGIN
+  CREATE TABLE __Migrations.LogV2
+  (
+    Id INT NOT NULL IDENTITY,
+    [Name] NVARCHAR(256) NOT NULL,
+    CreatedAt datetime NOT NULL CONSTRAINT DF_LogV2_Created DEFAULT (GETDATE()),
+    CreatedBy nvarchar(128) NOT NULL CONSTRAINT DF_LogV2_CreatedBy DEFAULT (SUSER_SNAME()),
+    CONSTRAINT PK_LogV2_Id PRIMARY KEY CLUSTERED ([Id] ASC),
+    CONSTRAINT UX_LogV2_Name UNIQUE ([Name])
+  )
+END
+IF EXISTS (SELECT 1 FROM $(_MigrationsTable))
+  AND NOT EXISTS (SELECT 1 FROM __Migrations.LogV2)
+BEGIN
+  PRINT 'Migrating "$(_MigrationsTable)" to "__Migrations.LogV2"'
+  INSERT INTO __Migrations.LogV2([Name])
+  SELECT Name from $(_MigrationsTable)
+END
+]]>
+    </_SetupScript>
+    <_OutputFile>$(_BaseDirectory)\DacpacDataMigrations.sql</_OutputFile>
+    <_OutputScript>
+      <![CDATA[
+-- Start of a data migration script
+]]>
+    </_OutputScript>
     <_PostDeploymentScript>
-      :r ".\$([MSBuild]::MakeRelative($(_BaseDirectory), $(_SetupFile)))"
-      :r ".\$([MSBuild]::MakeRelative($(_BaseDirectory), $(_OutputFile)))"
+      <![CDATA[
+:r ".\$([MSBuild]::MakeRelative($(_BaseDirectory), $(_SetupFile)))"
+:r ".\$([MSBuild]::MakeRelative($(_BaseDirectory), $(_OutputFile)))"
+      ]]>
     </_PostDeploymentScript>
     <_CommitScript>
-      COMMIT TRANSACTION;
+      <![CDATA[
+COMMIT TRANSACTION;
+]]>
     </_CommitScript>
 
     <_PreDeploymentScriptFile>$(_BaseDirectory)\Script.PreDeployment.sql</_PreDeploymentScriptFile>
     <_PostDeploymentScriptFile>$(_BaseDirectory)\Script.PostDeployment.sql</_PostDeploymentScriptFile>
 
-  </PropertyGroup>
+
+</PropertyGroup>
 
   <ItemGroup>
     <PreDeploy Include="$(_PreDeploymentScriptFile)" />
@@ -103,18 +114,19 @@
 
     <PropertyGroup>
       <_Script>
-        IF NOT EXISTS(SELECT 1 FROM $(_MigrationsTable) WHERE Name = '$(_Name)')
-        BEGIN
-        PRINT N'Applying migration ''$(_Name)'''
-        :r $(_Path)
-        INSERT INTO $(_MigrationsTable) VALUES ('$(_Name)')
-        END
+        <![CDATA[
+IF NOT EXISTS(SELECT 1 FROM __Migrations.LogV2 WHERE Name = '$(_Name)')
+BEGIN
+  PRINT N'Applying migration ''$(_Name)'''
+  :r $(_Path)
+  INSERT INTO __Migrations.LogV2([Name]) VALUES ('$(_Name)')
+END
+]]>
       </_Script>
     </PropertyGroup>
 
     <WriteLinesToFile File="$(_OutputFile)" Overwrite="false" Lines="$(_Script)" />
   </Target>
-
 
   <Target Name="AddPreDeployScripts" Inputs="@(_PreDeploy)" Outputs="%(Identity).Dummy">
     <PropertyGroup>
@@ -126,7 +138,9 @@
 
     <PropertyGroup>
       <_Script>
-        :r $(_Path)
+        <![CDATA[
+:r $(_Path)
+]]>
       </_Script>
     </PropertyGroup>
 
@@ -143,7 +157,9 @@
 
     <PropertyGroup>
       <_Script>
-        :r $(_Path)
+        <![CDATA[
+:r $(_Path)
+]]>
       </_Script>
     </PropertyGroup>
 
@@ -154,23 +170,9 @@
     <MakeDir Directories="$(_MigrationsRootFolder)" Condition="!Exists('$(_MigrationsRootFolder)')" />
     <MakeDir Directories="$(_BaseDirectory)" Condition="!Exists('$(_BaseDirectory)')" />
 
-    <ItemGroup>
-      <__Migration Include="$(_MigrationsRootFolder)\**\*.sql" />
-      <_Migration Include="@(__Migration)" Condition="'$(_SortMigrationFilesNumericOrder)' == 'false'"/>
-    </ItemGroup>
-
-    <SortItemGroup In="@(__Migration)" Condition="'$(_SortMigrationFilesNumericOrder)' == 'true'">
-      <Output TaskParameter="Out" ItemName="_Migration"/>
-    </SortItemGroup>
-    
-
-    <ItemGroup>
-      <_PreDeploy Include="$(MSBuildProjectDirectory)\PreDeploy.sql" Condition="Exists('$(MSBuildProjectDirectory)\PreDeploy.sql')" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <_PostDeploy Include="$(MSBuildProjectDirectory)\PostDeploy.sql" Condition="Exists('$(MSBuildProjectDirectory)\PostDeploy.sql')"/>
-    </ItemGroup>
+    <DacpacDataMigrations.SortItemGroup In="@(__Migration)" CompareNumbersInItemsAsNumbers="$(SortMigrationFilesUsingNumericOrder)">
+      <Output TaskParameter="Out" ItemName="_Migration" />
+    </DacpacDataMigrations.SortItemGroup>
 
     <Message Text="Writing migration setup file $(_SetupFile)" />
     <WriteLinesToFile File="$(_SetupFile)" Overwrite="true" Lines="$(_SetupScript)" />

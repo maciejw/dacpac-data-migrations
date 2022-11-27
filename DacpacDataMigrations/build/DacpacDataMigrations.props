@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_MigrationsRootFolder>DataMigrations</_MigrationsRootFolder>
+
+  </PropertyGroup>
+  <ItemGroup>
+    <_PreDeploy Include="PreDeploy.sql" Condition="Exists('$(MSBuildProjectDirectory)\PreDeploy.sql')" />
+    <_PostDeploy Include="PostDeploy.sql" Condition="Exists('$(MSBuildProjectDirectory)\PostDeploy.sql')" />
+    <__Migration Include="$(_MigrationsRootFolder)\**\*.sql" />
+    <None Include="@(__Migration)" />
+    <None Include="@(_PreDeploy)" />
+    <None Include="@(_PostDeploy)" />
+  </ItemGroup>
+</Project>

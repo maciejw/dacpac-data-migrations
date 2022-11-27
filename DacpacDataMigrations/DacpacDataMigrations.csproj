@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+    <Nullable>enable</Nullable>
+    <BuildOutputTargetFolder>build\</BuildOutputTargetFolder>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <DevelopmentDependency>true</DevelopmentDependency>
+
+    <AssemblyTitle>Dacpac Data Migrations</AssemblyTitle>
+    <Authors>warszawski.PRO</Authors>
+    <Description>Make changes to your database without data loss with dacpac. This package can be use in sqlproj SDK style projects.</Description>
+    <Copyright>© warszawski.PRO. All rights reserved</Copyright>
+
+    <PackageProjectUrl>https://maciejw.github.io/dacpac-data-migrations</PackageProjectUrl>
+    <PackageTags>dacpac deploy data migration</PackageTags>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="$(MSBuildProjectName).Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Sdk\**" PackagePath="Sdk\" Pack="true"/>
+    <None Include="build\**" PackagePath="build\" Pack="true"/>
+    <None Include="..\LICENSE.txt" PackagePath="\" Pack="true"/>
+    <None Include="..\README.md" PackagePath="\" Pack="true"/>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="16.10.0" PrivateAssets="all" ExcludeAssets="Runtime">
+      <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Build.Framework" Version="16.10.0" PrivateAssets="all" ExcludeAssets="Runtime">
+      <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>
